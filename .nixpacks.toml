@@ -1,21 +1,13 @@
 [phases.setup]
 nixPkgs = ["nodejs_18"]
 
-[phases.install_client]
-cwd = "client"
+[phases.install]
 cmds = ["npm install"]
 
-[phases.build_client]
-cwd = "client"
+[phases.build]
 cmds = ["npm run build"]
 
-[phases.install_server]
-cwd = "server"
-cmds = ["npm install"]
-
-[phases.copy_client_to_server]
-cmds = ["mkdir -p server/public", "cp -r client/dist/* server/public/"]
-
 [start]
-cmd = "node server/index.js"
+cmd = "npm start"
+
 
