@@ -1,4 +1,9 @@
 {
-  "name": "tncredits-fullstack",
-  "version": "1.0.0"
+  "name": "tncredits-app",
+  "private": true,
+  "workspaces": ["client", "server"],
+  "scripts": {
+    "build": "npm run build -w client",
+    "start": "node server/index.js"
+  }
 }
