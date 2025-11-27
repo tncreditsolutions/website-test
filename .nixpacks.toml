@@ -14,7 +14,8 @@ cwd = "server"
 cmds = ["npm install"]
 
 [phases.copy_client_to_server]
-cmds = ["cp -r client/dist server/public"]
+cmds = ["mkdir -p server/public", "cp -r client/dist/* server/public/"]
 
 [start]
 cmd = "node server/index.js"
+
