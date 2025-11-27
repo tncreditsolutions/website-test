@@ -8,8 +8,8 @@ require("dotenv").config();
 const app = express();
 app.use(cors());
 
-// Serve the built frontend
-app.use(express.static("dist"));
+// ✅ Serve the frontend from the correct folder
+app.use(express.static("client/dist"));
 
 const upload = multer();
 
@@ -38,9 +38,9 @@ app.post("/api/analyze", upload.single("file"), async (req, res) => {
   }
 });
 
-// Frontend fallback route
+// ✅ Redirect all other routes to React index.html
 app.get("*", (req, res) => {
-  res.sendFile(process.cwd() + "/dist/index.html");
+  res.sendFile(process.cwd() + "/client/dist/index.html");
 });
 
 app.listen(process.env.PORT || 3000, () =>
