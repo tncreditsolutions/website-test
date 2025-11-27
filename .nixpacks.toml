@@ -1,0 +1,10 @@
+# Build the frontend and backend
+[phases.build]
+cmds = [
+  "cd client && npm install && npm run build",
+  "cd server && npm install"
+]
+
+# Start the backend (Express, Node, etc.)
+[start]
+cmd = "cd server && npm start"
