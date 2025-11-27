@@ -1,3 +1,5 @@
+// server/index.js (robust static serving)
+const fs = require("fs");
 const path = require("path");
 const express = require("express");
 const multer = require("multer");
@@ -8,17 +10,39 @@ require("dotenv").config();
 
 const app = express();
 app.use(cors());
-
-// Serve the built frontend from client/dist
-const staticPath = path.join(__dirname, "..", "client", "dist");
-app.use(express.static(staticPath));
-
 const upload = multer();
 
+// Candidate build locations (check in order)
+const candidatePaths = [
+  path.join(process.cwd(), "client", "dist"), // preferred
+  path.join(process.cwd(), "dist"),            // alternate
+  path.join(process.cwd(), "client", "build"), // sometimes used
+  path.join(process.cwd(), "build")            // fallback
+];
+
+let staticPath = null;
+for (const p of candidatePaths) {
+  try {
+    if (fs.existsSync(p) && fs.statSync(p).isDirectory()) {
+      staticPath = p;
+      break;
+    }
+  } catch (e) {
+    // ignore
+  }
+}
+
+if (staticPath) {
+  console.log("Serving static files from:", staticPath);
+  app.use(express.static(staticPath));
+} else {
+  console.warn("No static build folder found. Expected one of:", candidatePaths);
+}
+
+// API route
 app.post("/api/analyze", upload.single("file"), async (req, res) => {
   try {
-    if (!req.file)
-      return res.status(400).json({ error: "No file uploaded" });
+    if (!req.file) return res.status(400).json({ error: "No file uploaded" });
 
     const pdfText = await pdfParse(req.file.buffer).then((d) => d.text);
 
@@ -35,17 +59,21 @@ app.post("/api/analyze", upload.single("file"), async (req, res) => {
 
     res.json({ summary: completion.choices[0].message });
   } catch (e) {
-    console.error(e);
+    console.error("API error:", e);
     res.status(500).json({ error: e.toString() });
   }
 });
 
-// Frontend fallback — for SPA (React Router or similar)
+// SPA fallback - only if a static path is available
 app.get("*", (req, res) => {
-  res.sendFile(path.join(staticPath, "index.html"));
+  if (staticPath) {
+    return res.sendFile(path.join(staticPath, "index.html"));
+  }
+  res.status(404).send("No frontend build found. Check server logs.");
 });
 
-app.listen(process.env.PORT || 3000, () =>
-  console.log("Server running on port", process.env.PORT || 3000)
-);
+const port = process.env.PORT || 3000;
+app.listen(port, () => {
+  console.log("Server running on port", port);
+});
 
