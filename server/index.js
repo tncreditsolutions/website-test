@@ -1,3 +1,4 @@
+const path = require("path");
 const express = require("express");
 const multer = require("multer");
 const cors = require("cors");
@@ -8,8 +9,9 @@ require("dotenv").config();
 const app = express();
 app.use(cors());
 
-// ✅ Serve the frontend from the correct folder
-app.use(express.static("client/dist"));
+// Serve the built frontend from client/dist
+const staticPath = path.join(__dirname, "..", "client", "dist");
+app.use(express.static(staticPath));
 
 const upload = multer();
 
@@ -32,18 +34,18 @@ app.post("/api/analyze", upload.single("file"), async (req, res) => {
     });
 
     res.json({ summary: completion.choices[0].message });
-
   } catch (e) {
+    console.error(e);
     res.status(500).json({ error: e.toString() });
   }
 });
 
-// ✅ Redirect all other routes to React index.html
+// Frontend fallback — for SPA (React Router or similar)
 app.get("*", (req, res) => {
-  res.sendFile(process.cwd() + "/client/dist/index.html");
+  res.sendFile(path.join(staticPath, "index.html"));
 });
 
 app.listen(process.env.PORT || 3000, () =>
-  console.log("Server running")
+  console.log("Server running on port", process.env.PORT || 3000)
 );
 
