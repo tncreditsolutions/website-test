@@ -1,10 +1,20 @@
-# Build the frontend and backend
-[phases.build]
-cmds = [
-  "cd client && npm install && npm run build",
-  "cd server && npm install"
-]
+[phases.setup]
+nixPkgs = ["nodejs_18"]
 
-# Start the backend (Express, Node, etc.)
+[phases.install_client]
+cwd = "client"
+cmds = ["npm install"]
+
+[phases.build_client]
+cwd = "client"
+cmds = ["npm run build"]
+
+[phases.install_server]
+cwd = "server"
+cmds = ["npm install"]
+
+[phases.copy_client_to_server]
+cmds = ["cp -r client/dist server/public"]
+
 [start]
-cmd = "cd server && npm start"
+cmd = "node server/index.js"
