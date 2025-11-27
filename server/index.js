@@ -1,3 +1,4 @@
+const path = require("path");
 const express = require("express");
 const multer = require("multer");
 const cors = require("cors");
@@ -8,7 +9,9 @@ require("dotenv").config();
 const app = express();
 app.use(cors());
 
-app.use(express.static("client/dist")); // serves your React build folder
+// Correct absolute build path for Railway & local use
+const clientDist = path.join(__dirname, "..", "client", "dist");
+app.use(express.static(clientDist));
 
 const upload = multer();
 
@@ -33,16 +36,16 @@ app.post("/api/analyze", upload.single("file"), async (req, res) => {
     res.json({ summary: completion.choices[0].message });
 
   } catch (e) {
+    console.error(e);
     res.status(500).json({ error: e.toString() });
   }
 });
 
+// fallback for React SPA
 app.get("*", (req, res) => {
-  // serves frontend index.html for all routes
-  res.sendFile(process.cwd() + "/client/dist/index.html");
+  res.sendFile(path.join(clientDist, "index.html"));
 });
 
 app.listen(process.env.PORT || 3000, () =>
-  console.log("Server running")
+  console.log("Server running on port", process.env.PORT || 3000)
 );
-
