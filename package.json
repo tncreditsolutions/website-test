@@ -1,9 +1,14 @@
 {
-  "name": "tncredits-app",
+  "name": "tncredits-root",
+  "version": "1.0.0",
   "private": true,
-  "workspaces": ["client", "server"],
+  "workspaces": [
+    "client"
+  ],
   "scripts": {
+    "postinstall": "cd client && npm install",
     "build": "npm run build -w client",
     "start": "node server/index.js"
-  }
+  },
+  "dependencies": {}
 }
